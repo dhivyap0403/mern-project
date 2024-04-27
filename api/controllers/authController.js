@@ -45,11 +45,13 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = user._doc;
+      const { password: hashedPassword, ...rest } = user._doc;
+      const expiryDate = new Date(Date.now() + 360000);
 
       res
         .cookie("access_token", token, {
           httpOnly: true,
+          expires: expiryDate,
         })
         .status(200)
         .json(rest);
@@ -64,11 +66,12 @@ export const google = async (req, res, next) => {
           Math.random().toString(36).slice(-8),
         email: req.body.email,
         password: hashedPassword,
-        avatar: req.body.photo,
+        profilePicture: req.body.photo,
       });
       await newUser.save();
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = newUser._doc;
+      const { password: hashedPassword2, ...rest } = newUser._doc;
+      const expiryDate = new Date(Date.now() + 3600000);
 
       res
         .cookie("access_token", token, {
